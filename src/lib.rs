@@ -147,6 +147,15 @@ pub fn show_update_dialog_gtk(config: &UpdaterConfig, new_version: &str, run_mai
     window.set_default_size(440, 260);
     window.set_position(gtk::WindowPosition::Center);
     window.set_resizable(false);
+    window.set_type_hint(gtk::gdk::WindowTypeHint::Dialog);
+    window.set_modal(true);
+
+    // Compatibilidad con escritorios sin compositor (LXDE, LXQt, XFCE/MATE sin composición)
+    if let Some(screen) = gtk::gdk::Screen::default() {
+        if !screen.is_composited() {
+            window.style_context().add_class("solid-csd");
+        }
+    }
 
     // Contenedor principal
     let main_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
@@ -249,6 +258,14 @@ pub fn show_update_dialog_gtk(config: &UpdaterConfig, new_version: &str, run_mai
         }
         button.btn-secondary:hover {
             background-color: #cbd5e1;
+        }
+        window.solid-csd,
+        window.solid-csd decoration,
+        .solid-csd decoration {
+            border: 1px solid #7c7c7c;
+            outline: 0px solid transparent;
+            box-shadow: none;
+            margin: 0;
         }
     ";
     let _ = provider.load_from_data(css.as_bytes());
